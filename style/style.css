@@ -7,15 +7,15 @@ html, body {
 
 #face {
     display: block;
+    height: 50%;
     width: 100%;
-    height: 100%;
 }
 
-#face div {
+#face > div {
     position: absolute;
     left: 0px;
     top: 0px;
-    height: 100%;
+    height: 50%;
     width: 100%;
 }
 
@@ -23,7 +23,12 @@ html, body {
     position: absolute;
     left: 0px;
     top: 0px;
+    height: 100%;
     width: 100%;
+}
+
+#face.large-face,
+#face.large-face > div {
     height: 100%;
 }
 

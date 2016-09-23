@@ -1,13 +1,10 @@
 module.exports = {
-    "env": {
-        "browser": true
-    },
     "extends": "eslint:recommended",
     "rules": {
         "no-console": "off",
 
         // Possible Errors
-        "no-extra-parens": "error",
+        "no-extra-parens": ["error", "functions"],
         "no-unsafe-negation": "error",
 
         // Best Practices
@@ -43,7 +40,7 @@ module.exports = {
         "no-labels": "error",
         "no-lone-blocks": "error",
         "no-loop-func": "error",
-        "no-magic-numbers": ["error", { "ignore": [1], "ignoreArrayIndexes": true}],
+        "no-magic-numbers": ["error", { "ignore": [0, 1], "ignoreArrayIndexes": true}],
         "no-multi-spaces": "error",
         "no-multi-str": "error",
         "no-new-func": "error",
@@ -72,6 +69,9 @@ module.exports = {
 
         // Strict mode
         "strict": "error",
+
+        // Variables
+        "no-use-before-define": "error",
 
         // Style settings
         "array-bracket-spacing": "error",

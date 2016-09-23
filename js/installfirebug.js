@@ -1,3 +1,5 @@
+/* global window */
+
 // Firebug to make it easier to debug on tablets or mobile
 // Setup for local usage https://groups.google.com/forum/#!topic/firebug/2eTvxtQE7vg
 
@@ -5,7 +7,8 @@
 // so instead injecting it only if 'debug' is in the query string
 (function () {
     'use strict';
-
+    var document = window.document;
+    var URLSearchParams = window.URLSearchParams;
     var searchParams = new URLSearchParams(document.location.search);
 
     if (searchParams.has('debug')) {

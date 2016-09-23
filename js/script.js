@@ -1,7 +1,13 @@
-
+/* global window */
 
 (function () {
     'use strict';
+    var console = window.console;
+    var document = window.document;
+    var requestAnimationFrame = window.requestAnimationFrame;
+    var URLSearchParams = window.URLSearchParams;
+    var setTimeout = window.setTimeout;
+    var fetch = window.fetch;
 
     console.log('[Lifecycle] JavaScript loading');
 
@@ -74,58 +80,60 @@
     };
 
     var createFaceController = function (faceElement) {
-        // frames[partName][emotionName] = [array of frame elements sorted by frame number]
-        var frames = {};
-
-        // setup tree for inheriting config
+        // Base config
         var defaultConfig = {
             startingFrame: 0
         };
 
+        // KeyKey maps to look-up names
         var partNames = {};
         var emotionNames = {};
 
-        // Face can show one emotion at a time
+        // Current emotion of face used for all parts
         var currentEmotion;
 
-        // currentFrames[partName] = reference to current frame
+        // Current selected frames
+        // currentFrames[partName] = frameReference
         var currentFrames = {};
 
-        var createAndPopulateRobotConfig = function (element, parentRobotConfig) {
-            var robotConfig = Object.create(parentRobotConfig);
+        // Creates a config object extending from another object
+        var createAndPopulateConfig = function (element, parentConfig) {
+            var config = Object.create(parentConfig);
 
             Object.keys(defaultConfig).forEach(function (name) {
                 if (element.dataset[name] !== undefined) {
-                    robotConfig[name] = JSON.parse(element.dataset[name]);
+                    if (isFinite(element.dataset[name])) {
+                        config[name] = parseFloat(element.dataset[name]);
+                    } else {
+                        config[name] = element.dataset[name];
+                    }
                 }
             });
 
-            return robotConfig;
+            return config;
         };
 
-        var setFaceEmotion = function (emotion) {
-            if (emotionNames[emotion] === undefined) {
-                console.error('[FaceController] Ignoring attempt to set invalid emotion', emotion);
-                return;
-            }
-
-            if (currentEmotion === emotion) {
-                return;
-            }
-
-            currentEmotion = emotion;
-            faceElement.dataset.emotion = currentEmotion;
-
-            Object.keys(currentFrames).forEach(function (partName) {
-                resetFrameForPart(partName);
-            });
+        // Reference Trees
+        var element = {
+            // face = faceReference
+            face: faceElement,
+            // parts[partName] = partReference
+            parts: {},
+            // emotions[partName][emotionName] = emotionReference
+            emotions: {},
+            // frames[partName][emotionName][frameIndex] = frameReference
+            frames: {}
         };
 
-        var setRandomFaceEmotion = function () {
-            var emotionArr = Object.keys(emotionNames);
-            var randomEmotionIndex = Math.round(Math.random() * (emotionArr.length - 1));
-            var randomEmotion = emotionArr[randomEmotionIndex];
-            setFaceEmotion(randomEmotion);
+        var config = {
+            // face = faceConfig
+            face: createAndPopulateConfig(element.face, defaultConfig),
+            // parts[partName] = partConfig
+            parts: {},
+            // emotions[partName][emotionName] = emotionConfig
+            emotions: {},
+            // frames[partName][emotionName][frameIndex] = frameConfig
+            frames: {}
         };
 
         // This function is sketchy at best, does nothing to handle errors in dom setup
@@ -136,39 +144,51 @@
 
             console.time('[FaceController] gather parts');
 
-            Array.prototype.slice.call(faceElement.querySelectorAll('[data-part]')).forEach(function (partElement) {
-                partNames[partElement.dataset.part] = partElement.dataset.part;
-                partElement.robotConfig = createAndPopulateRobotConfig(partElement, faceElement.robotConfig);
+            Array.prototype.slice.call(element.face.querySelectorAll('[data-part]')).forEach(function (partElement) {
+                var partName = partElement.dataset.part;
+
+                partNames[partName] = partName;
+
+                element.parts[partName] = partElement;
+                element.emotions[partName] = {};
+                element.frames[partName] = {};
+
+                config.parts[partName] = createAndPopulateConfig(partElement, config.face);
+                config.emotions[partName] = {};
+                config.frames[partName] = {};
             });
 
-            Array.prototype.slice.call(faceElement.querySelectorAll('[data-emotion]')).forEach(function (emotionElement) {
-                emotionNames[emotionElement.dataset.emotion] = emotionElement.dataset.emotion;
+            Array.prototype.slice.call(element.face.querySelectorAll('[data-emotion]')).forEach(function (emotionElement) {
+                var emotionName = emotionElement.dataset.emotion;
+                var parentPartElement = findParentWithDatasetName(emotionElement, 'part');
+                var parentPartName = parentPartElement.dataset.part;
 
-                var parentPart = findParentWithDatasetName(emotionElement, 'part');
-                emotionElement.robotConfig = createAndPopulateRobotConfig(emotionElement, parentPart.robotConfig);
+                emotionNames[emotionName] = emotionName;
+
+                element.emotions[parentPartName][emotionName] = emotionElement;
+                element.frames[parentPartName][emotionName] = [];
+
+                config.emotions[parentPartName][emotionName] = createAndPopulateConfig(emotionElement, config.parts[parentPartName]);
+                config.frames[parentPartName][emotionName] = [];
             });
 
             // hehe, lol, i wonder how long this monstrosity takes ¯\_(ツ)_/¯
             Object.keys(partNames).forEach(function (partName) {
-                frames[partName] = {};
                 currentFrames[partName] = undefined;
 
                 Object.keys(emotionNames).forEach(function (emotionName) {
-                    frames[partName][emotionName] = [];
-
                     var query = '[data-part="' + partName + '"] [data-emotion="' + emotionName + '"] [data-frame]';
-                    var currFrames = Array.prototype.slice.call(faceElement.querySelectorAll(query));
+                    var frameElements = Array.prototype.slice.call(element.face.querySelectorAll(query));
 
-                    if (currFrames.length === EMPTY_ARRAY) {
+                    if (frameElements.length === EMPTY_ARRAY) {
                         console.error('[FaceController] missing frames for part', partName, 'and emotion', emotionName);
                         return;
                     }
 
-                    var parentEmotion = findParentWithDatasetName(currFrames[0], 'emotion');
-
-                    currFrames.forEach(function (currFrame) {
-                        frames[partName][emotionName][currFrame.dataset.frame] = currFrame;
-                        currFrame.robotConfig = createAndPopulateRobotConfig(currFrame, parentEmotion.robotConfig);
+                    frameElements.forEach(function (frameElement) {
+                        var frameIndex = frameElement.dataset.frame;
+                        element.frames[partName][emotionName][frameIndex] = frameElement;
+                        config.frames[partName][emotionName][frameIndex] = createAndPopulateConfig(frameElement, config.emotions[partName][emotionName]);
                     });
 
                     // TODO Need to verify continuity of array
@@ -180,22 +200,100 @@
             console.group('FaceController] Detected pieces');
             console.log('[FaceController]: parts', Object.keys(partNames).join(', '));
             console.log('[FaceController]: emotions', Object.keys(emotionNames).join(', '));
-            console.log('[FaceController]: frames', frames);
+            console.log('[FaceController]: elements', element);
+            console.log('[FaceController]: config', config);
             console.groupEnd();
+        };
+
+        // Animations have a startingFrame, direction, and a cycle
+        // startingFrame: 0, 1, 2, 'last'
+        // cycle: 'loop' or 'reverse' //not implemented
+        // direction: 'increment' or 'decrement' //not implemented
+        // Animation position is a fractional completion from 0 - 1
+        var setAnimationPositionForPart = function (partName, position) {
+            if (partNames[partName] === undefined) {
+                console.error('[FaceController] Attempting to reset invalid part', partName);
+                return;
+            }
+
+            var numFrames = element.frames[partName][currentEmotion].length;
+            var startIndex = config.emotions[partName][currentEmotion].startingFrame;
+
+            if (startIndex === 'last') {
+                startIndex = numFrames - 1;
+            } else if (startIndex < 0 || startIndex > numFrames - 1) {
+                startIndex = 0;
+            }
+
+            // Assumes loop and increment for now
+            // var frameIndex = Math.floor((startIndex + ((position * numFrames) - 1)) % (numFrames - 1));
+            var frameIndex = Math.floor((startIndex + ((numFrames - 1) * position)) % numFrames);
+            console.log(frameIndex);
+            var newFrame = element.frames[partName][currentEmotion][frameIndex];
+
+            if (currentFrames[partName] !== newFrame) {
+                if (currentFrames[partName] !== undefined) {
+                    currentFrames[partName].removeAttribute('data-selected');
+                }
+
+                currentFrames[partName] = newFrame;
+                currentFrames[partName].setAttribute('data-selected', 0);
+            }
+
+            // // If a current frame has not been chosen yet use a temporary one
+            // if (currentFrames[partName] === undefined) {
+            //     currentFrames[partName] = element.frames[partName][currentEmotion][0];
+            //     currentFrames[partName].setAttribute('data-selected', '');
+            // }
+
+            // var startingFrameIndex = config.parts[partName].startingFrame;
+
+            // var startingFrame = element.frames[partName][currentEmotion][startingFrameIndex];
+
+            // if (currentFrames[partName] !== startingFrame) {
+            //     currentFrames[partName].removeAttribute('data-selected');
+            //     currentFrames[partName] = startingFrame;
+            //     currentFrames[partName].setAttribute('data-selected', '');
+            // }
+        };
+
+        var setFaceEmotion = function (emotionName) {
+            if (emotionNames[emotionName] === undefined) {
+                console.error('[FaceController] Ignoring attempt to set invalid emotion', emotionName);
+                return;
+            }
+
+            if (currentEmotion === emotionName) {
+                return;
+            }
+
+            currentEmotion = emotionName;
+            element.face.dataset.emotion = currentEmotion;
+
+            Object.keys(currentFrames).forEach(function (partName) {
+                setAnimationPositionForPart(partName, 0.0);
+            });
+        };
+
+        var setRandomFaceEmotion = function () {
+            var emotionArr = Object.keys(emotionNames);
+            var randomEmotionIndex = Math.round(Math.random() * (emotionArr.length - 1));
+            var randomEmotion = emotionArr[randomEmotionIndex];
+            setFaceEmotion(randomEmotion);
         };
 
         var setupInitialState = function () {
             var FIRST_EMOTION = 0;
 
             // Get a valid starting emotion for the face
-            var faceEmotion = emotionNames[faceElement.dataset.emotion];
+            var faceEmotion = emotionNames[element.face.dataset.emotion];
 
             if (faceEmotion === undefined) {
                 faceEmotion = Object.keys(emotionNames)[FIRST_EMOTION];
             }
 
             // Clear any selected frames
-            var selectedFrames = Array.prototype.slice.call(faceElement.querySelectorAll('[data-frame][data-selected]'));
+            var selectedFrames = Array.prototype.slice.call(element.face.querySelectorAll('[data-frame][data-selected]'));
             selectedFrames.forEach(function (frame) {
                 frame.removeAttribute('data-selected');
             });
@@ -204,41 +302,13 @@
             setFaceEmotion(faceEmotion);
         };
 
-        var resetFrameForPart = function (partName) {
-            if (partNames[partName] === undefined) {
-                console.error('[FaceController] Attempting to reset invalid part', partName);
-                return;
-            }
-
-            // If a current frame has not been chosen yet use a temporary one
-            if (currentFrames[partName] === undefined) {
-                currentFrames[partName] = frames[partName][currentEmotion][0];
-                currentFrames[partName].setAttribute('data-selected', '');
-            }
-
-            var startingFrameIndex = currentFrames[partName].robotConfig.startingFrame;
-
-            if (startingFrameIndex === 'last') {
-                startingFrameIndex = frames[partName][currentEmotion].length - 1;
-            }
-
-            var startingFrame = frames[partName][currentEmotion][startingFrameIndex];
-
-            if (currentFrames[partName] !== startingFrame) {
-                currentFrames[partName].removeAttribute('data-selected');
-                currentFrames[partName] = startingFrame;
-                currentFrames[partName].setAttribute('data-selected', '');
-            }
-        };
-
-        faceElement.robotConfig = createAndPopulateRobotConfig(faceElement, defaultConfig);
         gatherParts();
         setupInitialState();
 
         return {
             setFaceEmotion: setFaceEmotion,
             setRandomFaceEmotion: setRandomFaceEmotion,
-            resetFrameForPart: resetFrameForPart,
+            setAnimationPositionForPart: setAnimationPositionForPart,
             get currentEmotion () {
                 return currentEmotion;
             }
@@ -371,8 +441,8 @@
         var currentEmotion = faceController.currentEmotion;
         var isTalking = false;
 
-        faceController.resetFrameForPart('mouth');
-        faceController.resetFrameForPart('eyes');
+        faceController.setAnimationPositionForPart('mouth', 0.0);
+        faceController.setAnimationPositionForPart('eyes', 0.0);
 
         // Would love a more advanced blinking model but this works for now:
         // between each blink is an interval of 2–10 seconds; actual rates vary by individual averaging around 10 blinks per minute in a laboratory setting
@@ -383,9 +453,9 @@
             faceController.setFaceEmotion(currentEmotion);
 
             if (isTalking) {
-                faceController.nextFrameForPart('mouth');
+                faceController.setAnimationPositionForPart('mouth', 1);
             } else {
-                faceController.resetFrameForPart('mouth');
+                faceController.setAnimationPositionForPart('mouth', 0);
             }
 
             requestAnimationFrame(processAnimations);
@@ -411,6 +481,7 @@
         var els = findElementsById([
             'controls',
             'fullscreenButton',
+            'toggleLargeFaceButton',
             'face'
         ]);
 
@@ -435,6 +506,11 @@
 
         els.fullscreenButton.addEventListener('click', function () {
             requestFullscreen(els.face);
+            els.face.classList.add('large-face');
+        });
+
+        els.toggleLargeFaceButton.addEventListener('click', function () {
+            els.face.classList.toggle('large-face');
         });
 
         if (searchParams.has('noconnect') === false) {
