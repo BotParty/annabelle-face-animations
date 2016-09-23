@@ -167,7 +167,6 @@
             // Assumes loop and increment for now
             // var frameIndex = Math.floor((startIndex + ((position * numFrames) - 1)) % (numFrames - 1));
             var frameIndex = Math.floor((startIndex + ((numFrames - 1) * position)) % numFrames);
-            console.log(frameIndex);
             var newFrame = element.frames[partName][currentEmotion][frameIndex];
 
             if (currentFrames[partName] !== newFrame) {

@@ -16,7 +16,7 @@ module.exports = {
         "consistent-return": "error",
         "curly": "error",
         "default-case": "error",
-        "dot-location": "error",
+        "dot-location": ["error", "property"],
         "dot-notation": "error",
         "eqeqeq": "error",
         "guard-for-in": "error",
@@ -68,7 +68,7 @@ module.exports = {
         "yoda": "error",
 
         // Strict mode
-        "strict": "error",
+        "strict": ["error", "function"],
 
         // Variables
         "no-use-before-define": "error",
@@ -77,7 +77,7 @@ module.exports = {
         "array-bracket-spacing": "error",
         "block-spacing": "error",
         "brace-style": "error",
-        "camelcase": "error",
+        "camelcase": ["error", {properties: "never"}],
         "comma-dangle": "error",
         "comma-spacing": "error",
         "comma-style": "error",

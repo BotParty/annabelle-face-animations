@@ -59,6 +59,10 @@ html, body {
     background-color: red;
 }
 
+#face[data-emotion="dead"] {
+    background-color: red;
+}
+
 #face[data-emotion="disgust"] {
     background-color: red;
 }
@@ -119,6 +123,6 @@ html, body {
     background-color: red;
 }
 
-#face[data-emotion="worried"] {
+#face[data-emotion="worry"] {
     background-color: red;
 }

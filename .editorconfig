@@ -4,7 +4,7 @@
 root = true
 
 # Matches all files in root, js, and style
-[{/*,/js/*,/style/*}]
+[{/*,/js/*,/style/*,/tools/createfacedom/files/**}]
 
 # Unix-style newlines with a newline ending every file
 end_of_line = lf
