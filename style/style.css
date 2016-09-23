@@ -1,17 +1,8 @@
 
-
 html, body {
     height: 100%;
     width: 100%;
     margin: 0;
-}
-
-.face-layer {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    height: 100%;
-    width: 100%;
 }
 
 #face {
@@ -20,19 +11,109 @@ html, body {
     height: 100%;
 }
 
-#skin {
+#face > div {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+}
+
+#face img {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+/* hide non-selected elements */
+#face [data-emotion]:not([data-selected]) {
+    display: none;
+}
+
+/* hide nose when begging */
+#face[data-emotion="begging"] .nose {
+    display: none;
+}
+
+/* face background colors */
+#face[data-emotion="angry"] {
     background-color: red;
 }
 
-#eyes {
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-image: url('../faces/neutral-eyes.svg');
+#face[data-emotion="bedroom"] {
+    background-color: red;
 }
 
-#mouth {
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-image: url('../faces/neutral-mouth.svg');
+#face[data-emotion="begging"] {
+    background-color: red;
 }
 
+#face[data-emotion="buckteeth"] {
+    background-color: red;
+}
+
+#face[data-emotion="disgust"] {
+    background-color: red;
+}
+
+#face[data-emotion="dizzy"] {
+    background-color: red;
+}
+
+#face[data-emotion="eyeroll"] {
+    background-color: red;
+}
+
+#face[data-emotion="happy"] {
+    background-color: red;
+}
+
+#face[data-emotion="heart"] {
+    background-color: red;
+}
+
+#face[data-emotion="laughter"] {
+    background-color: red;
+}
+
+#face[data-emotion="mischevious"] {
+    background-color: red;
+}
+
+#face[data-emotion="money"] {
+    background-color: red;
+}
+
+#face[data-emotion="neutral"] {
+    background-color: red;
+}
+
+#face[data-emotion="peeved"] {
+    background-color: red;
+}
+
+#face[data-emotion="sad"] {
+    background-color: red;
+}
+
+#face[data-emotion="stars"] {
+    background-color: red;
+}
+
+#face[data-emotion="stoned"] {
+    background-color: red;
+}
+
+#face[data-emotion="surprised"] {
+    background-color: red;
+}
+
+#face[data-emotion="thinking"] {
+    background-color: red;
+}
+
+#face[data-emotion="worried"] {
+    background-color: red;
+}

@@ -5,26 +5,46 @@
 
 <head>
 
+<script src="js/installfirebug.js"></script>
+
+<!-- Polyfills: Use newer standard features in older browsers -->
+<script src="polyfills/es6-promise.js"></script>
+<script src="polyfills/fetch.js"></script>
+<script src="polyfills/url-search-params.max.js"></script>
+
+<!-- Page Source -->
 <script src="js/script.js"></script>
 <link rel="stylesheet" type="text/css" href="style/style.css">
-
 
 </head>
 
 
 <body>
-<div id="face" data-parts="skin, eyes, mouth">
-<div id="skin" class="face-layer">
+<div id="face" data-emotion="disgust">
+
+<div class="eyes" data-part="eyes">
+<img src="faces/eyes-angry-0.svg" data-emotion="angry" data-frame="0">
+<img src="faces/eyes-angry-1.svg" data-emotion="angry" data-frame="1">
+<img src="faces/eyes-angry-2.svg" data-emotion="angry" data-frame="2">
+<img src="faces/eyes-begging-0.svg" data-emotion="begging" data-frame="0">
+<img src="faces/eyes-begging-1.svg" data-emotion="begging" data-frame="1">
+<img src="faces/eyes-disgust-0.svg" data-emotion="disgust" data-frame="0">
+<img src="faces/eyes-disgust-1.svg" data-emotion="disgust" data-frame="1">
+<img src="faces/eyes-disgust-2.svg" data-emotion="disgust" data-frame="2">
 </div>
 
-<div id="eyes" class="face-layer">
+<div class="mouth" data-part="mouth">
+<img src="faces/mouth-angry-0.svg" data-emotion="angry" data-frame="0">
+<img src="faces/mouth-angry-1.svg" data-emotion="angry" data-frame="1">
+<img src="faces/mouth-begging-0.svg" data-emotion="begging" data-frame="0">
+<img src="faces/mouth-disgust-0.svg" data-emotion="disgust" data-frame="0">
+<img src="faces/mouth-disgust-1.svg" data-emotion="disgust" data-frame="1">
 </div>
 
-<div id="nose" class="face-layer">
+<div class="nose">
+<img src="faces/nose.svg">
 </div>
 
-<div id="mouth" class="face-layer">
-</div>
 </div>
 
 <div id="controls">

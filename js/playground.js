@@ -97,3 +97,29 @@
 //         start: create
 //     };
 // };
+
+// var validCommands = function (commands) {
+//     var isValid = true;
+
+//     if (Array.isArray(commands) === false) {
+//         console.log('[Message] Expected an array of commands', commands);
+//         isValid = false;
+//     }
+
+//     commands.forEach(function (command) {
+//         if (typeof command.emotion !== 'string') {
+//             console.log('[Message] Invalid emotion, received', command.emotion);
+//             isValid = false;
+//         }
+
+//         if (typeof command.isTalking !== 'boolean') {
+//             console.log('[Message] Talking state must be boolean, received:', command.isTalking);
+//             isValid = false;
+//         }
+//     });
+
+//     return isValid;
+// };
+
+// parse parts string
+// var partsArray = faceElement.dataset.parts.match(/\S+/g);
