@@ -8,7 +8,18 @@
     /*
      * Helper functions
      */
-    
+
+    var findParentWithDatasetName = function (element, datasetName) {
+        var currParent;
+        for (currParent = element.parentElement; currParent !== null; currParent = currParent.parentElement) {
+            if (currParent.dataset[datasetName] !== undefined) {
+                return currParent;
+            }
+        }
+
+        return undefined;
+    };
+
     var findElementsById = function (elementNames) {
         var elements = {};
 
@@ -25,17 +36,19 @@
     };
 
     var domReady = function (readyCallback) {
-        if (document.readyState !== 'loading') {
-            readyCallback();
-        } else {
+        if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', readyCallback);
+        } else {
+            readyCallback();
         }
     };
 
     var makeFullscreenPointerLockCommand = function () {
         var testElement = document.body;
-        var noop = function () {};
-        
+        var noop = function () {
+            // Intentionally left blank
+        };
+
         var fullscreenFunction = testElement.requestFullscreen ||
             testElement.mozRequestFullScreen ||
             testElement.webkitRequestFullscreen ||
@@ -61,42 +74,54 @@
     };
 
     var createFaceController = function (faceElement) {
+        // frames[partName][emotionName] = [array of frame elements sorted by frame number]
+        var frames = {};
+
+        // setup tree for inheriting config
+        var defaultConfig = {
+            startingFrame: 0
+        };
+
         var partNames = {};
         var emotionNames = {};
 
-        // structure: frames.part.emotion = [array of frame elements sorted by frame number]
-        var frames = {};
-
-        // Face can show one emotion for now
+        // Face can show one emotion at a time
         var currentEmotion;
 
-        // structure: currentFrames.part = frame reference
+        // currentFrames[partName] = reference to current frame
         var currentFrames = {};
 
-        var setFaceEmotion = function (emotion) {
-            var STARTING_FRAME = 0;
+        var createAndPopulateRobotConfig = function (element, parentRobotConfig) {
+            var robotConfig = Object.create(parentRobotConfig);
 
+            Object.keys(defaultConfig).forEach(function (name) {
+                if (element.dataset[name] !== undefined) {
+                    robotConfig[name] = JSON.parse(element.dataset[name]);
+                }
+            });
+
+            return robotConfig;
+        };
+
+        var setFaceEmotion = function (emotion) {
             if (emotionNames[emotion] === undefined) {
                 console.error('[FaceController] Ignoring attempt to set invalid emotion', emotion);
                 return;
             }
 
+            if (currentEmotion === emotion) {
+                return;
+            }
+
             currentEmotion = emotion;
+            faceElement.dataset.emotion = currentEmotion;
 
             Object.keys(currentFrames).forEach(function (partName) {
-                if (currentFrames[partName] !== undefined) {
-                    currentFrames[partName].removeAttribute('data-selected');
-                }
-
-                currentFrames[partName] = frames[partName][currentEmotion][STARTING_FRAME];
-
-                if (currentFrames[partName] !== undefined) {
-                    currentFrames[partName].setAttribute('data-selected', '');
-                }
+                resetFrameForPart(partName);
             });
         };
 
-        var setFaceRandomEmotion = function () {
+        var setRandomFaceEmotion = function () {
             var emotionArr = Object.keys(emotionNames);
             var randomEmotionIndex = Math.round(Math.random() * (emotionArr.length - 1));
             var randomEmotion = emotionArr[randomEmotionIndex];
@@ -111,12 +136,16 @@
 
             console.time('[FaceController] gather parts');
 
-            Array.prototype.slice.call(faceElement.querySelectorAll('[data-part]')).forEach(function (el) {
-                partNames[el.dataset.part] = el.dataset.part;
+            Array.prototype.slice.call(faceElement.querySelectorAll('[data-part]')).forEach(function (partElement) {
+                partNames[partElement.dataset.part] = partElement.dataset.part;
+                partElement.robotConfig = createAndPopulateRobotConfig(partElement, faceElement.robotConfig);
             });
-            
-            Array.prototype.slice.call(faceElement.querySelectorAll('[data-emotion]')).forEach(function (el) {
-                emotionNames[el.dataset.emotion] = el.dataset.emotion;
+
+            Array.prototype.slice.call(faceElement.querySelectorAll('[data-emotion]')).forEach(function (emotionElement) {
+                emotionNames[emotionElement.dataset.emotion] = emotionElement.dataset.emotion;
+
+                var parentPart = findParentWithDatasetName(emotionElement, 'part');
+                emotionElement.robotConfig = createAndPopulateRobotConfig(emotionElement, parentPart.robotConfig);
             });
 
             // hehe, lol, i wonder how long this monstrosity takes ¯\_(ツ)_/¯
@@ -127,19 +156,25 @@
                 Object.keys(emotionNames).forEach(function (emotionName) {
                     frames[partName][emotionName] = [];
 
-                    var query = '[data-part="' + partName + '"] [data-emotion="' + emotionName + '"][data-frame]';
+                    var query = '[data-part="' + partName + '"] [data-emotion="' + emotionName + '"] [data-frame]';
                     var currFrames = Array.prototype.slice.call(faceElement.querySelectorAll(query));
 
                     if (currFrames.length === EMPTY_ARRAY) {
                         console.error('[FaceController] missing frames for part', partName, 'and emotion', emotionName);
+                        return;
                     }
+
+                    var parentEmotion = findParentWithDatasetName(currFrames[0], 'emotion');
 
                     currFrames.forEach(function (currFrame) {
                         frames[partName][emotionName][currFrame.dataset.frame] = currFrame;
+                        currFrame.robotConfig = createAndPopulateRobotConfig(currFrame, parentEmotion.robotConfig);
                     });
+
+                    // TODO Need to verify continuity of array
                 });
             });
-            
+
             console.timeEnd('[FaceController] gather parts');
 
             console.group('FaceController] Detected pieces');
@@ -154,13 +189,10 @@
 
             // Get a valid starting emotion for the face
             var faceEmotion = emotionNames[faceElement.dataset.emotion];
-            
-            if (faceEmotion === undefined) {
-                faceEmotion = emotionNames[FIRST_EMOTION];
-            }
 
-            currentEmotion = faceEmotion;
-            faceElement.dataset.emotion = currentEmotion;
+            if (faceEmotion === undefined) {
+                faceEmotion = Object.keys(emotionNames)[FIRST_EMOTION];
+            }
 
             // Clear any selected frames
             var selectedFrames = Array.prototype.slice.call(faceElement.querySelectorAll('[data-frame][data-selected]'));
@@ -169,63 +201,82 @@
             });
 
             // Set the initial emotion
-            setFaceEmotion(currentEmotion);
+            setFaceEmotion(faceEmotion);
         };
 
+        var resetFrameForPart = function (partName) {
+            if (partNames[partName] === undefined) {
+                console.error('[FaceController] Attempting to reset invalid part', partName);
+                return;
+            }
+
+            // If a current frame has not been chosen yet use a temporary one
+            if (currentFrames[partName] === undefined) {
+                currentFrames[partName] = frames[partName][currentEmotion][0];
+                currentFrames[partName].setAttribute('data-selected', '');
+            }
+
+            var startingFrameIndex = currentFrames[partName].robotConfig.startingFrame;
+
+            if (startingFrameIndex === 'last') {
+                startingFrameIndex = frames[partName][currentEmotion].length - 1;
+            }
+
+            var startingFrame = frames[partName][currentEmotion][startingFrameIndex];
+
+            if (currentFrames[partName] !== startingFrame) {
+                currentFrames[partName].removeAttribute('data-selected');
+                currentFrames[partName] = startingFrame;
+                currentFrames[partName].setAttribute('data-selected', '');
+            }
+        };
+
+        faceElement.robotConfig = createAndPopulateRobotConfig(faceElement, defaultConfig);
         gatherParts();
         setupInitialState();
 
         return {
             setFaceEmotion: setFaceEmotion,
-            setFaceRandomEmotion: setFaceRandomEmotion
+            setRandomFaceEmotion: setRandomFaceEmotion,
+            resetFrameForPart: resetFrameForPart,
+            get currentEmotion () {
+                return currentEmotion;
+            }
         };
     };
 
-    var createMessageProcessor = function () {
-        // Message format is a JSON string representing the following:
-        /*
-        {
-            "emotion": "angry" / "sad",
-            "isTalking": true / false
-        }
-        */
-        var parseCommandMessage = function (message) {
-            var command;
-
-            try {
-                command = JSON.parse(message);
-            } catch (err) {
-                console.log('[Message] Could not parse JSON, ignoring. Error message:', err);
-                return undefined;
-            }
-
-            if (typeof command.emotion !== 'string') {
-                console.log('[Message] Command has invalid emotion:', command.emotion);
-                return undefined;
-            }
-
-            if (typeof command.isTalking !== 'boolean') {
-                console.log('[Message] Command has invalid isTalking parameter:', command.isTalking);
-                return undefined;
-            }
-
-            return command;
-        };
-
+    var createMessageValidator = function (messageProcessor) {
+        // Parses the JSON message and verifies the following fields.
+        // Returns undefined if the message is invalid.
+        // {
+        //     "emotion": <string>,
+        //     "isTalking": <boolean>
+        // }
         var processMessage = function (message) {
-            var command = parseCommandMessage(message);
-
-            if (command === undefined) {
+            if (typeof message !== 'object' || message === null) {
+                console.error('[Validator] Message should be an object with keys:', message);
                 return;
             }
 
+            if (typeof message.emotion !== 'string') {
+                console.error('[Validator] Message has invalid emotion:', message.emotion);
+                return;
+            }
 
+            if (typeof message.isTalking !== 'boolean') {
+                console.error('[Validator] Message has invalid isTalking parameter:', message.isTalking);
+                return;
+            }
+
+            messageProcessor.processMessage(message);
         };
 
-        return processMessage;
+        return {
+            processMessage: processMessage
+        };
     };
 
-    var createPollingHTTPConnectionManager = function (dataUrl, messageCallback) {
+    var createPollingHTTPConnectionManager = function (dataUrl, messageProcessor) {
         var POLLING_INTERVAL_MS = 250,
             FETCH_IMMEDIATELY_MS = 0;
         var HTTP_SUCCESS_MIN = 200,
@@ -257,9 +308,9 @@
                 }
                 throw new Error(response.statusText);
             }).then(function (response) {
-                return response.text();
-            }).then(function (data) {
-                messageCallback(data);
+                return response.json();
+            }).then(function (message) {
+                messageProcessor.processMessage(message);
                 setTimeout(fetchData, POLLING_INTERVAL_MS);
             }).catch(function (error) {
                 console.error('[Fetch] Request failure', error);
@@ -292,6 +343,64 @@
         };
     };
 
+    // This animation engine ignores messages and instead changes
+    // faces randomly on requestAnimationFrame
+    var createFaceBenchmarkAnimationEngine = function (faceController) {
+        requestAnimationFrame(function randomFace () {
+            faceController.setRandomFaceEmotion();
+            requestAnimationFrame(randomFace);
+        });
+        return {
+            processMessage: function () {
+                // Ignore messages
+            }
+        };
+    };
+
+    var createSingleRandomFaceAnimationEngine = function (faceController) {
+        faceController.setRandomFaceEmotion();
+
+        return {
+            processMessage: function () {
+                // Ignore messages
+            }
+        };
+    };
+
+    var createDirectMessageAnimationEngine = function (faceController) {
+        var currentEmotion = faceController.currentEmotion;
+        var isTalking = false;
+
+        faceController.resetFrameForPart('mouth');
+        faceController.resetFrameForPart('eyes');
+
+        // Would love a more advanced blinking model but this works for now:
+        // between each blink is an interval of 2–10 seconds; actual rates vary by individual averaging around 10 blinks per minute in a laboratory setting
+        // source: https://en.wikipedia.org/wiki/blinking
+
+        // For now no blinking and just talk when mouth open
+        requestAnimationFrame(function processAnimations () {
+            faceController.setFaceEmotion(currentEmotion);
+
+            if (isTalking) {
+                faceController.nextFrameForPart('mouth');
+            } else {
+                faceController.resetFrameForPart('mouth');
+            }
+
+            requestAnimationFrame(processAnimations);
+        });
+
+        var processMessage = function (message) {
+            isTalking = message.isTalking;
+            currentEmotion = message.emotion;
+        };
+
+        return {
+            processMessage: processMessage
+        };
+    };
+
     var main = function () {
         console.log('[Lifecycle] Main running');
 
@@ -305,9 +414,24 @@
             'face'
         ]);
 
+        // Data flow: connectionManager -> messageValidator -> animationEngine -> faceController
         var faceController = createFaceController(els.face);
-        var messageProcessor = createMessageProcessor();
-        var connectionManager = createPollingHTTPConnectionManager(DATA_ENDPOINT_URL, messageProcessor);
+
+        var animationEngine;
+
+        if (searchParams.has('benchmark')) {
+            animationEngine = createFaceBenchmarkAnimationEngine(faceController);
+        } else if (searchParams.has('random')) {
+            animationEngine = createSingleRandomFaceAnimationEngine(faceController);
+        } else {
+            animationEngine = createDirectMessageAnimationEngine(faceController);
+        }
+
+        // Helpful for debugging for now
+        window.animationEngine = animationEngine;
+
+        var messageValidator = createMessageValidator(animationEngine);
+        var connectionManager = createPollingHTTPConnectionManager(DATA_ENDPOINT_URL, messageValidator);
 
         els.fullscreenButton.addEventListener('click', function () {
             requestFullscreen(els.face);
@@ -316,11 +440,6 @@
         if (searchParams.has('noconnect') === false) {
             connectionManager.start();
         }
-
-        requestAnimationFrame(function setRandomFace () {
-            faceController.setFaceRandomEmotion();
-            requestAnimationFrame(setRandomFace);
-        });
     };
 
     // Start-up main after the DOM has loaded

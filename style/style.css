@@ -11,7 +11,7 @@ html, body {
     height: 100%;
 }
 
-#face > div {
+#face div {
     position: absolute;
     left: 0px;
     top: 0px;
@@ -28,7 +28,7 @@ html, body {
 }
 
 /* hide non-selected elements */
-#face [data-emotion]:not([data-selected]) {
+#face [data-frame]:not([data-selected]) {
     display: none;
 }
 

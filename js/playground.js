@@ -39,9 +39,9 @@
 //             console.info('[WebSocket] create already called, ignoring');
 //             return;
 //         }
-        
+
 //         console.info('[WebSocket] create', webSocketUrl);
-        
+
 //         socket = new WebSocket(webSocketUrl);
 //         socket.addEventListener('open', socketOpen);
 //         socket.addEventListener('message', commandCallback);

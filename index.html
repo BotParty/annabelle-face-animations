@@ -5,40 +5,52 @@
 
 <head>
 
-<script src="js/installfirebug.js"></script>
-
 <!-- Polyfills: Use newer standard features in older browsers -->
+<script src="polyfills/url-search-params.max.js"></script>
 <script src="polyfills/es6-promise.js"></script>
 <script src="polyfills/fetch.js"></script>
-<script src="polyfills/url-search-params.max.js"></script>
 
-<!-- Page Source -->
-<script src="js/script.js"></script>
+<!-- Install Firebug before any of the robot face scripts -->
+<script src="js/installfirebug.js"></script>
+
+<!-- Robot Face Scripts -->
 <link rel="stylesheet" type="text/css" href="style/style.css">
+<script src="js/script.js"></script>
 
 </head>
-
 
 <body>
 <div id="face" data-emotion="disgust">
 
-<div class="eyes" data-part="eyes">
-<img src="faces/eyes-angry-0.svg" data-emotion="angry" data-frame="0">
-<img src="faces/eyes-angry-1.svg" data-emotion="angry" data-frame="1">
-<img src="faces/eyes-angry-2.svg" data-emotion="angry" data-frame="2">
-<img src="faces/eyes-begging-0.svg" data-emotion="begging" data-frame="0">
-<img src="faces/eyes-begging-1.svg" data-emotion="begging" data-frame="1">
-<img src="faces/eyes-disgust-0.svg" data-emotion="disgust" data-frame="0">
-<img src="faces/eyes-disgust-1.svg" data-emotion="disgust" data-frame="1">
-<img src="faces/eyes-disgust-2.svg" data-emotion="disgust" data-frame="2">
+<div data-part="eyes" data-starting-frame='"last"'>
+<div data-emotion="angry">
+<img src="faces/eyes-angry-0.svg" data-frame="0">
+<img src="faces/eyes-angry-1.svg" data-frame="1">
+<img src="faces/eyes-angry-2.svg" data-frame="2">
+</div>
+<div data-emotion="begging">
+<img src="faces/eyes-begging-0.svg" data-frame="0">
+<img src="faces/eyes-begging-1.svg" data-frame="1">
+</div>
+<div data-emotion="disgust">
+<img src="faces/eyes-disgust-0.svg" data-frame="0">
+<img src="faces/eyes-disgust-1.svg" data-frame="1">
+<img src="faces/eyes-disgust-2.svg" data-frame="2">
+</div>
 </div>
 
-<div class="mouth" data-part="mouth">
-<img src="faces/mouth-angry-0.svg" data-emotion="angry" data-frame="0">
-<img src="faces/mouth-angry-1.svg" data-emotion="angry" data-frame="1">
-<img src="faces/mouth-begging-0.svg" data-emotion="begging" data-frame="0">
-<img src="faces/mouth-disgust-0.svg" data-emotion="disgust" data-frame="0">
-<img src="faces/mouth-disgust-1.svg" data-emotion="disgust" data-frame="1">
+<div data-part="mouth">
+<div data-emotion="angry">
+<img src="faces/mouth-angry-0.svg" data-frame="0">
+<img src="faces/mouth-angry-1.svg" data-frame="1">
+</div>
+<div data-emotion="begging">
+<img src="faces/mouth-begging-0.svg" data-frame="0">
+</div>
+<div data-emotion="disgust">
+<img src="faces/mouth-disgust-0.svg" data-frame="0">
+<img src="faces/mouth-disgust-1.svg" data-frame="1">
+</div>
 </div>
 
 <div class="nose">
