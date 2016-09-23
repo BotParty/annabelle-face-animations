@@ -40,7 +40,7 @@
         }
     };
 
-    var makeFullscreenPointerLockCommand = function () {
+    var createFullscreenPointerLockCommand = function () {
         var testElement = document.body;
         var noop = function () {
             // Intentionally left blank
@@ -107,7 +107,7 @@
         var DATA_ENDPOINT_URL = '/status/face';
         var searchParams = new URLSearchParams(document.location.search);
 
-        var requestFullscreen = makeFullscreenPointerLockCommand();
+        var requestFullscreen = createFullscreenPointerLockCommand();
         var els = findElementsById([
             'controls',
             'fullscreenButton',
