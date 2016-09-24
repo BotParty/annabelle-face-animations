@@ -165,8 +165,8 @@
             }
 
             // Assumes loop and increment for now
-            // var frameIndex = Math.floor((startIndex + ((position * numFrames) - 1)) % (numFrames - 1));
-            var frameIndex = Math.floor((startIndex + ((numFrames - 1) * position)) % numFrames);
+            // TODO actually use startIndex
+            var frameIndex = Math.round((numFrames - 1) * position);
             var newFrame = element.frames[partName][currentEmotion][frameIndex];
 
             if (currentFrames[partName] !== newFrame) {
@@ -193,6 +193,10 @@
             //     currentFrames[partName] = startingFrame;
             //     currentFrames[partName].setAttribute('data-selected', '');
             // }
+        };
+
+        var getEmotions = function () {
+            return Object.keys(emotionNames);
         };
 
         var getFaceEmotion = function () {
@@ -251,7 +255,8 @@
             setFaceEmotion: setFaceEmotion,
             getFaceEmotion: getFaceEmotion,
             setRandomFaceEmotion: setRandomFaceEmotion,
-            setAnimationPositionForPart: setAnimationPositionForPart
+            setAnimationPositionForPart: setAnimationPositionForPart,
+            getEmotions: getEmotions
         };
     };
 }());

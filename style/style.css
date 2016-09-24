@@ -48,81 +48,81 @@ html, body {
 }
 
 #face[data-emotion="bedroom"] {
-    background-color: red;
+    background-color: pink;
 }
 
 #face[data-emotion="begging"] {
-    background-color: red;
+    background-color: lightblue;
 }
 
 #face[data-emotion="buckteeth"] {
-    background-color: red;
+    background-color: white;
 }
 
 #face[data-emotion="dead"] {
-    background-color: red;
+    background-color: white;
 }
 
 #face[data-emotion="disgust"] {
-    background-color: red;
+    background-color: green;
 }
 
 #face[data-emotion="dizzy"] {
-    background-color: red;
+    background-color: white;
 }
 
 #face[data-emotion="eyeroll"] {
-    background-color: red;
+    background-color: gray;
 }
 
 #face[data-emotion="happy"] {
-    background-color: red;
+    background-color: yellow;
 }
 
 #face[data-emotion="heart"] {
-    background-color: red;
+    background-color: pink;
 }
 
 #face[data-emotion="laughter"] {
-    background-color: red;
+    background-color: yellow;
 }
 
 #face[data-emotion="mischevious"] {
-    background-color: red;
+    background-color: grey;
 }
 
 #face[data-emotion="money"] {
-    background-color: red;
+    background-color: mediumseagreen;
 }
 
 #face[data-emotion="neutral"] {
-    background-color: red;
+    background-color: gray;
 }
 
 #face[data-emotion="peeved"] {
-    background-color: red;
+    background-color: green;
 }
 
 #face[data-emotion="sad"] {
-    background-color: red;
+    background-color: dodgerblue;
 }
 
 #face[data-emotion="stars"] {
-    background-color: red;
+    background-color: yellow;
 }
 
 #face[data-emotion="stoned"] {
-    background-color: red;
+    background-color: gray;
 }
 
 #face[data-emotion="surprised"] {
-    background-color: red;
+    background-color: lightcoral;
 }
 
 #face[data-emotion="thinking"] {
-    background-color: red;
+    background-color: darkgoldenrod;
 }
 
 #face[data-emotion="worry"] {
-    background-color: red;
+    background-color: mediumpurple;
 }

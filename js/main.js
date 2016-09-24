@@ -104,7 +104,6 @@
     var main = function () {
         console.log('[Lifecycle] Main running');
 
-        var DATA_ENDPOINT_URL = '/status/face';
         var searchParams = new URLSearchParams(document.location.search);
 
         var requestFullscreen = createFullscreenPointerLockCommand();
@@ -124,6 +123,8 @@
             animationEngine = ANIMATION_ENGINE.createFaceBenchmarkAnimationEngine(faceController);
         } else if (searchParams.has('random')) {
             animationEngine = ANIMATION_ENGINE.createSingleRandomFaceAnimationEngine(faceController);
+        } else if (searchParams.has('cycle')) {
+            animationEngine = ANIMATION_ENGINE.createCycleAnimationEngine(faceController);
         } else {
             animationEngine = ANIMATION_ENGINE.createDirectMessageAnimationEngine(faceController);
         }
@@ -131,8 +132,9 @@
         // Helpful for debugging for now
         window.animationEngine = animationEngine;
 
+        var httpConnectionUrl = els.face.dataset.httpConnectionUrl;
         var messageValidator = createMessageValidator(animationEngine);
-        var connectionManager = CONNECTION_MANAGER.createPollingHTTPConnectionManager(DATA_ENDPOINT_URL, messageValidator);
+        var connectionManager = CONNECTION_MANAGER.createPollingHTTPConnectionManager(httpConnectionUrl, messageValidator);
 
         els.fullscreenButton.addEventListener('click', function () {
             requestFullscreen(els.face);

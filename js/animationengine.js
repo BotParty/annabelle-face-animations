@@ -4,6 +4,7 @@
     'use strict';
     window.robotface.animationengine = {};
 
+    var setTimeout = window.setTimeout;
     var requestAnimationFrame = window.requestAnimationFrame;
     var ANIMATION_ENGINE = window.robotface.animationengine;
 
@@ -23,6 +24,47 @@
 
     ANIMATION_ENGINE.createSingleRandomFaceAnimationEngine = function (faceController) {
         faceController.setRandomFaceEmotion();
+
+        return {
+            processMessage: function () {
+                // Ignore messages
+            }
+        };
+    };
+
+    ANIMATION_ENGINE.createCycleAnimationEngine = function (faceController) {
+        var FACE_CHANGE_PERIOD_MS = 1500;
+        var emotions = faceController.getEmotions();
+        var currEmotionIndex = 0;
+        var lastTime;
+        var PART_ANIMATION_PERIOD_MS = 300;
+
+        requestAnimationFrame(function advanceAnimation (currTime) {
+            if (lastTime === undefined) {
+                lastTime = currTime;
+            }
+
+            if (currTime - lastTime > PART_ANIMATION_PERIOD_MS) {
+                lastTime = currTime;
+            }
+
+            var animationPosition = (currTime - lastTime) / PART_ANIMATION_PERIOD_MS;
+            faceController.setAnimationPositionForPart('mouth', animationPosition);
+            faceController.setAnimationPositionForPart('eyes', animationPosition);
+            requestAnimationFrame(advanceAnimation);
+        });
+
+        setTimeout(function setNextFace () {
+            faceController.setFaceEmotion(emotions[currEmotionIndex]);
+
+            currEmotionIndex += 1;
+
+            if (currEmotionIndex >= emotions.length) {
+                currEmotionIndex = 0;
+            }
+
+            setTimeout(setNextFace, FACE_CHANGE_PERIOD_MS);
+        }, FACE_CHANGE_PERIOD_MS);
 
         return {
             processMessage: function () {
