@@ -151,6 +151,7 @@
         var httpConnectionUrl = els.face.dataset.httpConnectionUrl;
         var connectionManager = CONNECTION_MANAGER.createPollingHTTPConnectionManager(httpConnectionUrl, messageValidator);
 
+        // Setup Page Control Panel
         els.fullscreen.addEventListener('click', function () {
             requestFullscreen(els.face);
             els.face.classList.add('large-face');

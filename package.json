@@ -9,7 +9,7 @@
   "author": "Milan Raj (@rajsite)",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^3.4.0",
-    "http-server": "^0.9.0"
+    "eslint": "3.4.0",
+    "http-server": "0.9.0"
   }
 }
