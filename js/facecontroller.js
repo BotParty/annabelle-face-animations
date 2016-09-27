@@ -195,7 +195,7 @@
             // }
         };
 
-        var getEmotions = function () {
+        var getAllFaceEmotions = function () {
             return Object.keys(emotionNames);
         };
 
@@ -256,7 +256,7 @@
             getFaceEmotion: getFaceEmotion,
             setRandomFaceEmotion: setRandomFaceEmotion,
             setAnimationPositionForPart: setAnimationPositionForPart,
-            getEmotions: getEmotions
+            getAllFaceEmotions: getAllFaceEmotions
         };
     };
 }());

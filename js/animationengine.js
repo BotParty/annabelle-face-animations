@@ -34,7 +34,7 @@
 
     ANIMATION_ENGINE.createCycleAnimationEngine = function (faceController) {
         var FACE_CHANGE_PERIOD_MS = 1500;
-        var emotions = faceController.getEmotions();
+        var emotions = faceController.getAllFaceEmotions();
         var currEmotionIndex = 0;
         var lastTime;
         var PART_ANIMATION_PERIOD_MS = 300;

@@ -14,7 +14,8 @@
 <script src="js/installfirebug.js"></script>
 
 <!-- Robot Face Scripts -->
-<link rel="stylesheet" type="text/css" href="style/style.css">
+<link rel="stylesheet" type="text/css" href="style/face.css">
+<link rel="stylesheet" type="text/css" href="style/app.css">
 <script src="js/support.js"></script>
 <script src="js/facecontroller.js"></script>
 <script src="js/animationengine.js"></script>
@@ -201,13 +202,29 @@
 
 </div>
 
-
-
-<div id="controls">
-<button id="fullscreenButton">Make Fullscreen</button>
-<button id="toggleLargeFaceButton">Toggle Large Face</button>
+<div class="controls">
+<span>Face size</span>
+<button id="fullscreen">Make Fullscreen</button>
+<button id="largeface">Toggle Large Face</button>
 </div>
 
+<div class="controls">
+<span>Debug</span>
+<button id="console">Toggle Firebug Console</button>
+<button id="noconnect">Toggle Connect to Server</button>
+</div>
+
+<div class="controls">
+<span>Face Update Mode</span>
+<button id="benchmark">Toggle Benchmark Mode</button>
+<button id="cycle">Toggle Cycle Mode</button>
+<button id="random">Toggle Random Single Face Mode</button>
+</div>
+
+<div class="controls">
+<span>Emotion Panel</span>
+<div id="emotioncontroller"></div>
+</div>
 </body>
 
 </html>

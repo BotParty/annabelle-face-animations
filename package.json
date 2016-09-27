@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "eslint .",
-    "run": "http-server -p 8020 -o"
+    "serve": "http-server -p 8020 -o"
   },
   "author": "Milan Raj (@rajsite)",
   "license": "MIT",
