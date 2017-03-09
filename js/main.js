@@ -116,6 +116,7 @@
         var requestFullscreen = createFullscreenPointerLockCommand();
         var els = findElementsById([
             'face',
+            'controlpanel',
             'fullscreen',
             'largeface',
             'console',
@@ -130,7 +131,7 @@
 
         // Setup Face Controller
         var faceController = FACE_CONTROLLER.createFaceController(els.face);
-
+        
         // Setup Animation Engine
         var animationEngine;
 
@@ -148,63 +149,70 @@
         var messageValidator = createMessageValidator(animationEngine);
 
         // Setup Connection Manager
-        var httpConnectionUrl = els.face.dataset.httpConnectionUrl;
-        var connectionManager = CONNECTION_MANAGER.createPollingHTTPConnectionManager(httpConnectionUrl, messageValidator);
-
-        // Setup Page Control Panel
-        els.fullscreen.addEventListener('click', function () {
-            requestFullscreen(els.face);
-            els.face.classList.add('large-face');
-        });
-
-        els.largeface.addEventListener('click', function () {
-            els.face.classList.toggle('large-face');
-        });
-
-        els.console.addEventListener('click', function () {
-            toggleAndNavigate(searchParams, 'debug');
-        });
-
-        els.noconnect.addEventListener('click', function () {
-            toggleAndNavigate(searchParams, 'noconnect');
-        });
-
-        els.benchmark.addEventListener('click', function () {
-            toggleAndNavigate(searchParams, 'benchmark');
-        });
-
-        els.cycle.addEventListener('click', function () {
-            toggleAndNavigate(searchParams, 'cycle');
-        });
-
-        els.random.addEventListener('click', function () {
-            toggleAndNavigate(searchParams, 'random');
-        });
-
-        var allEmotions = faceController.getAllFaceEmotions();
-        var allEmotionsFragment = document.createDocumentFragment();
-
-        allEmotions.forEach(function (emotionName) {
-            var emotionButton = document.createElement('button');
-            emotionButton.textContent = emotionName;
-            emotionButton.classList.add('emotioncontrol');
-
-            allEmotionsFragment.appendChild(emotionButton);
-        });
-
-        els.emotioncontroller.appendChild(allEmotionsFragment);
-        els.emotioncontroller.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('emotioncontrol') === false) {
-                return;
-            }
-
-            faceController.setFaceEmotion(evt.target.textContent);
-        });
-
-        // Start Connection
-        if (searchParams.has('noconnect') === false) {
-            connectionManager.start();
+        var connectionManager;
+        if (searchParams.has('localstate')) {
+            connectionManager = CONNECTION_MANAGER.createLocalConnectionManager('',messageValidator);
+        } else {
+            var httpConnectionUrl = els.face.dataset.httpConnectionUrl;
+            connectionManager = CONNECTION_MANAGER.createPollingHTTPConnectionManager(httpConnectionUrl, messageValidator);
         }
+        if (!searchParams.has('showtime')) {
+                // Setup Page Control Panel
+                els.fullscreen.addEventListener('click', function () {
+                    requestFullscreen(els.face);
+                    els.face.classList.add('large-face');
+                });
+
+                els.largeface.addEventListener('click', function () {
+                    els.face.classList.toggle('large-face');
+                });
+
+                els.console.addEventListener('click', function () {
+                    toggleAndNavigate(searchParams, 'debug');
+                });
+
+                els.noconnect.addEventListener('click', function () {
+                    toggleAndNavigate(searchParams, 'noconnect');
+                });
+
+                els.benchmark.addEventListener('click', function () {
+                    toggleAndNavigate(searchParams, 'benchmark');
+                });
+
+                els.cycle.addEventListener('click', function () {
+                    toggleAndNavigate(searchParams, 'cycle');
+                });
+
+                els.random.addEventListener('click', function () {
+                    toggleAndNavigate(searchParams, 'random');
+                });
+
+                var allEmotions = faceController.getAllFaceEmotions();
+                var allEmotionsFragment = document.createDocumentFragment();
+
+                allEmotions.forEach(function (emotionName) {
+                    var emotionButton = document.createElement('button');
+                    emotionButton.textContent = emotionName;
+                    emotionButton.classList.add('emotioncontrol');
+
+                    allEmotionsFragment.appendChild(emotionButton);
+                });
+
+                els.emotioncontroller.appendChild(allEmotionsFragment);
+                els.emotioncontroller.addEventListener('click', function (evt) {
+                    if (evt.target.classList.contains('emotioncontrol') === false) {
+                        return;
+                    }
+
+                    faceController.setFaceEmotion(evt.target.textContent);
+                });
+        } else {
+            els.controlpanel.remove();
+            els.face.classList.add('large-face');
+        }
+    
+        connectionManager.start();
+        
     };
 
     // Start-up main after the DOM has loaded

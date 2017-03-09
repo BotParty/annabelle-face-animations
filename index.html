@@ -26,7 +26,7 @@
 
 <body>
 
-<div id="face" data-http-connection-url="/status/face">
+<div id="face" data-http-connection-url="http://localhost:8088/api/face">
 <div data-part="eyes" data-starting-frame="last">
 <div data-emotion="angry">
 <img src="faces/eyes-angry-0.svg" data-frame="0">
@@ -201,29 +201,30 @@
 </div>
 
 </div>
+<div id="controlpanel">
+    <div class="controls">
+    <span>Face size</span>
+    <button id="fullscreen">Make Fullscreen</button>
+    <button id="largeface">Toggle Large Face</button>
+    </div>
 
-<div class="controls">
-<span>Face size</span>
-<button id="fullscreen">Make Fullscreen</button>
-<button id="largeface">Toggle Large Face</button>
-</div>
+    <div class="controls">
+    <span>Debug</span>
+    <button id="console">Toggle Firebug Console</button>
+    <button id="noconnect">Toggle Connect to Server</button>
+    </div>
 
-<div class="controls">
-<span>Debug</span>
-<button id="console">Toggle Firebug Console</button>
-<button id="noconnect">Toggle Connect to Server</button>
-</div>
+    <div class="controls">
+    <span>Face Update Mode</span>
+    <button id="benchmark">Toggle Benchmark Mode</button>
+    <button id="cycle">Toggle Cycle Mode</button>
+    <button id="random">Toggle Random Single Face Mode</button>
+    </div>
 
-<div class="controls">
-<span>Face Update Mode</span>
-<button id="benchmark">Toggle Benchmark Mode</button>
-<button id="cycle">Toggle Cycle Mode</button>
-<button id="random">Toggle Random Single Face Mode</button>
-</div>
-
-<div class="controls">
-<span>Emotion Panel</span>
-<div id="emotioncontroller"></div>
+    <div class="controls">
+    <span>Emotion Panel</span>
+    <div id="emotioncontroller"></div>
+    </div<
 </div>
 </body>
 
